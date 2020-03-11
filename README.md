@@ -1,5 +1,5 @@
 **Openfire Server using Docker Compose**
-Latest release: 0.1.0 - Openfire v4.4.2 - [Docker Hub] (https://) 
+Latest release: 0.1.0 - Openfire v4.4.2 - [Docker Hub] (https://hub.docker.com/r/jmorcate/openfire) 
 ## Quick Start
 If you want to run the Openfire Server you will need to have Docker and Docker Compose intalled in tyour system.
 ```shell
