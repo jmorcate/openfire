@@ -1,0 +1,87 @@
+version: "3.1"
+
+services:
+
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    image: db_openfire:0.1.0
+    restart: always
+    environment:
+      OPENFIRE_DB: $OPENFIRE_DB
+      OPENFIRE_DB_OWNER: $OPENFIRE_DB_OWNER
+      OPENFIRE_DB_PASSWORD: $OPENFIRE_DB_PASSWORD
+      OPENFIRE_ADMIN_PASSWORD: $OPENFIRE_ADMIN_PASSWORD
+      LDAP_BASE_DN: $LDAP_BASE_DN
+      LDAP_ADMIN_PASSWORD: $LDAP_ADMIN_PASSWORD
+      XMPP_DOMAIN: $XMPP_DOMAIN
+      OPENFIRE_ADMIN: $OPENFIRE_ADMIN
+    volumes:
+      - openfire_data:/var/lib/postgresql/data
+
+  openfire:
+    build:
+      context: .
+      dockerfile: Dockerfile-openfire
+    image: openfire:0.1.0
+    restart: always
+    environment:
+      OPENFIRE_DB: $OPENFIRE_DB
+      OPENFIRE_DB_OWNER: $OPENFIRE_DB_OWNER
+      OPENFIRE_DB_PASSWORD: $OPENFIRE_DB_PASSWORD
+      OPENFIRE_SERVER: $OPENFIRE_SERVER
+    ports:
+      - 9090:9090
+      - 9091:9091
+      - 5222:5222
+    volumes:
+      - openfire_conf:/opt/openfire/conf
+      - ./openfire/plugins:/opt/openfire/plugins
+    depends_on:
+      - ldap
+      - db
+
+  ldap:
+    build:
+      context: .
+      dockerfile: Dockerfile-ldap
+    image: ldap_openfire:0.1.0
+    restart:   always
+    command: --copy-service
+    environment:
+      LDAP_ORGANISATION: $LDAP_ORGANISATION
+      LDAP_DOMAIN: $LDAP_DOMAIN
+      LDAP_ADMIN_PASSWORD: $LDAP_ADMIN_PASSWORD
+      OPENFIRE_ADMIN_GROUP: $OPENFIRE_ADMIN_GROUP
+      OPENFIRE_ADMIN_FULL_NAME: $OPENFIRE_ADMIN_FULL_NAME
+      OPENFIRE_ADMIN_PASSWORD: $OPENFIRE_ADMIN_PASSWORD
+      OPENFIRE_ADMIN: $OPENFIRE_ADMIN
+    volumes:
+      - ldap-database:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+      - ./ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+
+  php-ldap-admin:
+    image: osixia/phpldapadmin:latest
+    restart: always
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+    ports:
+      - 6443:443
+    volumes:
+      - phpldapadmin:/var/www/phpldapadmin
+    depends_on:
+      - ldap
+
+volumes:
+  openfire_data:
+    external: false
+  openfire_conf:
+    external: false
+  ldap-database:
+    external: false
+  ldap-config:
+    external: false
+  phpldapadmin:
+    external: false

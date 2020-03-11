@@ -1,0 +1,26 @@
+FROM osixia/openldap:latest
+
+LABEL com.example.version="0.1.0-beta" \
+      vendor1="Example Section" \
+      vendor2="Example Inc." \
+      com.example.release-date="to be defined" 
+      
+
+# These are the defaults in osixia/openladap. 
+# shown here because they are important in our app.
+ENV   LDAP_ORGANISATION: Example Inc. \
+      LDAP_DOMAIN:  example.com 
+
+# These are our own environment supporting Openfire.
+ENV   OPENFIRE_ADMIN_GROUP: admin_group \
+      OPENFIRE_ADMIN_FULL_NAME: Openfire Administrator \
+      OPENFIRE_ADMIN_PASSWORD: of_admin_pass  \
+      OPENFIRE_ADMIN: of_admin
+
+# Copy definition of the openfire admin user    
+COPY ldap/10-admin.ldif /container/service/slapd/assets/config/bootstrap/ldif/10-admin.ldif
+COPY ldap/hashit.pl .
+
+# Copy customized version of the startup.sh script allowing more substitution 
+# in the ldif files.
+COPY ldap/startup.sh /container/service/slapd/startup.sh

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jive>
+
+  <adminConsole>
+    <port>9090</port>
+    <securePort>9091</securePort>
+  </adminConsole>
+
+  <locale>en</locale>
+
+  <connectionProvider>
+    <className>org.jivesoftware.database.DefaultConnectionProvider</className>
+  </connectionProvider>
+  <database>
+    <defaultProvider>
+      <driver>org.postgresql.Driver</driver>
+      <serverURL>jdbc:postgresql://db:5432/$OPENFIRE_DB</serverURL>
+      <username encrypted="true">$ENCRYPTED_USERNAME</username>
+      <password encrypted="true">$ENCRYPTED_PASSWORD</password>
+      <testSQL>select 1</testSQL>
+      <testBeforeUse>false</testBeforeUse>
+      <testAfterUse>false</testAfterUse>
+      <testTimeout>500</testTimeout>
+      <timeBetweenEvictionRuns>30000</timeBetweenEvictionRuns>
+      <minIdleTime>900000</minIdleTime>
+      <maxWaitTime>500</maxWaitTime>
+      <minConnections>5</minConnections>
+      <maxConnections>25</maxConnections>
+      <connectionTimeout>1.0</connectionTimeout>
+    </defaultProvider>
+  </database>
+  <setup>true</setup>
+  <fqdn>$OPENFIRE_SERVER</fqdn>
+</jive>

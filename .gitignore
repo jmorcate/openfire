@@ -1,0 +1,5 @@
+openfire/plugins/*
+!openfire/plugins/search.jar
+!openfire/plugins/admin.jar
+
+

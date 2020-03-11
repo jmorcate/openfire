@@ -1,0 +1,53 @@
+FROM ubuntu:bionic
+
+LABEL com.example.version="0.1.0-beta" \
+      vendor1="Example Section" \
+      vendor2="Example Inc." \
+      com.exmaple.release-date="to be defined" 
+
+ENV  OPENFIRE_DB_OWNER: of_owner \
+     OPENFIRE_DB_PASSWORD: of_owner_pass \
+     OPENFIRE_SERVER: openfire-server.example.org
+
+
+# Postgress client required to check in the database is available
+# before trying to start the Openfire server.
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install --no-install-recommends --yes \
+            postgresql-client \
+            gettext-base \
+            libcrypt-cbc-perl \
+            libcrypt-blowfish-perl \
+            libdigest-sha-perl \
+            wget \
+            openjdk-11-jre-headless  \
+    && rm -rf /var/lib/apt/lists/*
+    
+# Install Openfire
+RUN wget --no-check-certificate  --quiet \
+        https://github.com/igniterealtime/Openfire/releases/download/v4.4.2/openfire_4_4_2.tar.gz \
+    && tar -C /opt -zxf openfire_4_4_2.tar.gz \
+    && rm openfire_4_4_2.tar.gz \
+    && chmod a+x /opt/openfire/bin/openfire.sh
+
+# Copy precanned configuration files
+COPY openfire/conf/* /opt/openfire/conf/
+
+# Copy enconder for username/password
+COPY openfire/encoder.pl .
+
+# Copy the entrypoint script
+COPY openfire/openfire-entrypoint.sh .
+
+RUN chmod +x openfire-entrypoint.sh \
+    && mkdir /opt/openfire/logs \
+    && touch /opt/openfire/logs/all.log /opt/openfire/logs/error.log \
+    && ln -sf /dev/stdout /opt/openfire/logs/all.log \
+    && ln -sf /dev/stderr /opt/openfire/logs/error.log
+
+# We expose the two ports to access the Openfire console
+EXPOSE 9090 9091 5222
+
+
+ENTRYPOINT ["/openfire-entrypoint.sh"]

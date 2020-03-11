@@ -1,0 +1,32 @@
+FROM postgres:12.1
+
+LABEL com.example.version="0.1.0-beta" \
+      vendor1="Example Section" \
+      vendor2="Example Inc." \
+      com.example.release-date="to be defined" 
+
+RUN apt-get update \
+    && apt-get install  --no-install-recommends --yes \
+            libcrypt-cbc-perl \
+            libcrypt-blowfish-perl \
+            libdigest-sha-perl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setting password for the database
+ENV POSTGRES_USER: postgres \
+    POSTGRES_PASSWORD: postgres_pass
+
+# To be coordinate with Openfire
+ENV OPENFIRE_DB_OWNER: of_db_owner \
+    OPENFIRE_DB_PASSWORD: of_db_owner_pass \ 
+    XMPP_DOMAIN: openfire.example.com
+
+# To be coordinate with LDAP Server
+ENV LDAP_ADMIN_PASSWORD: ldap_admin_pass \
+    LDAP_BASE_DN: dc=example,dc=com 
+
+ENV OPENFIRE_DB: of_db 
+
+COPY postgres/database/ /docker-entrypoint-initdb.d/
+RUN chmod a+x /docker-entrypoint-initdb.d/* \
+    && chmod a+w  /docker-entrypoint-initdb.d/sql/*
